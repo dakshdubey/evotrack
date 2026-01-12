@@ -1,0 +1,17 @@
+{
+    "name": "@evotrack/server",
+    "version": "1.0.0",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "tsc"
+    },
+    "dependencies": {
+        "axios": "^1.6.0",
+        "axios-retry": "^4.0.0",
+        "@evotrack/core": "1.0.0"
+    },
+    "devDependencies": {
+        "typescript": "^5.3.0"
+    }
+}

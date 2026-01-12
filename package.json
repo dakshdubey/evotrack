@@ -1,0 +1,20 @@
+{
+  "name": "evotrack-monorepo",
+  "private": true,
+  "packageManager": "npm@10.2.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "turbo": "latest",
+    "typescript": "^5.3.0",
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0"
+  }
+}
