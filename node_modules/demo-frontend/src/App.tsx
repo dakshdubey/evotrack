@@ -1,34 +1,34 @@
 import React, { useState } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Login, Signup } from './components/Auth';
+import { VendorDashboard } from './components/VendorDashboard';
 import { CustomerView } from './components/CustomerView';
 import { DeliveryView } from './components/DeliveryView';
 
 function App() {
-    const [role, setRole] = useState<'HOME' | 'CUSTOMER' | 'DELIVERY'>('HOME');
-
-    if (role === 'CUSTOMER') return <CustomerView />;
-    if (role === 'DELIVERY') return <DeliveryView />;
+    const [user, setUser] = useState<any>(null);
 
     return (
-        <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f5f5f5', gap: '20px' }}>
-            <h1>EvoTrack Demo Platform</h1>
-            <p style={{ color: '#666' }}>Select your experience role:</p>
+        <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<Navigate to="/login" />} />
+                <Route path="/login" element={<Login onLogin={setUser} />} />
+                <Route path="/signup" element={<Signup />} />
 
-            <div style={{ display: 'flex', gap: '20px' }}>
-                <button
-                    onClick={() => setRole('CUSTOMER')}
-                    style={{ padding: '20px 40px', fontSize: '18px', background: 'white', border: '2px solid #fc8019', color: '#fc8019', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' }}
-                >
-                    🍔 Use Consumer App
-                </button>
-
-                <button
-                    onClick={() => setRole('DELIVERY')}
-                    style={{ padding: '20px 40px', fontSize: '18px', background: 'black', border: '2px solid black', color: 'white', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' }}
-                >
-                    🛵 Use Delivery App
-                </button>
-            </div>
-        </div>
+                <Route
+                    path="/vendor"
+                    element={user?.role === 'VENDOR' ? <VendorDashboard user={user} /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/customer"
+                    element={user?.role === 'CUSTOMER' ? <CustomerView user={user} /> : <Navigate to="/login" />}
+                />
+                <Route
+                    path="/delivery"
+                    element={user?.role === 'DELIVERY_AGENT' ? <DeliveryView user={user} /> : <Navigate to="/login" />}
+                />
+            </Routes>
+        </BrowserRouter>
     );
 }
 

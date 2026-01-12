@@ -1,31 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { EvoDelivery, SimulationUtils } from '@evotrack/client';
+import { EvoDelivery, SimulationUtils } from 'evotrack-client';
 
 const API_URL = 'http://localhost:4000/api';
 
-export const DeliveryView = () => {
+export const DeliveryView = ({ user }: { user: any }) => {
     const [agents, setAgents] = useState<any[]>([]);
-    const [selectedAgent, setSelectedAgent] = useState<any>(null);
+    const [selectedAgent, setSelectedAgent] = useState<any>(user); // Use logged in user
     const [pendingOrders, setPendingOrders] = useState<any[]>([]);
     const [activeOrder, setActiveOrder] = useState<any>(null);
-    const [status, setStatus] = useState('Offline');
+    const [status, setStatus] = useState('Online');
 
     const deliverySDK = useRef<EvoDelivery | null>(null);
 
-    // 1. Load Agents
-    useEffect(() => {
-        fetch(`${API_URL}/agents`).then(res => res.json()).then(setAgents);
-    }, []);
+    /* 1. Load Agents - REMOVED since we have Auth now */
+
 
     // 2. Poll for Pending Orders
     useEffect(() => {
         const interval = setInterval(() => {
-            if (status === 'Online') {
-                fetch(`${API_URL}/orders/pending`).then(res => res.json()).then(setPendingOrders);
+            if (status === 'Online' && user) {
+                fetch(`${API_URL}/orders?role=DELIVERY_AGENT&userId=${user.id}`)
+                    .then(res => res.json())
+                    .then(setPendingOrders)
+                    .catch(err => console.error('Failed to fetch orders:', err));
             }
         }, 3000);
         return () => clearInterval(interval);
-    }, [status]);
+    }, [status, user]);
 
     const login = (agent: any) => {
         setSelectedAgent(agent);
@@ -36,7 +37,7 @@ export const DeliveryView = () => {
         const res = await fetch(`${API_URL}/orders/${orderId}/accept`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ agentId: selectedAgent.id })
+            body: JSON.stringify({ agentId: user.id }) // Use logged in user ID
         });
         const data = await res.json();
 
@@ -83,24 +84,7 @@ export const DeliveryView = () => {
         });
     };
 
-    if (!selectedAgent) {
-        return (
-            <div style={{ padding: '40px', maxWidth: '400px', margin: '0 auto', textAlign: 'center' }}>
-                <h2>🛵 Delivery Partner Login</h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {agents.map(agent => (
-                        <button
-                            key={agent.id}
-                            onClick={() => login(agent)}
-                            style={{ padding: '15px', fontSize: '16px', cursor: 'pointer', border: '1px solid #ccc', borderRadius: '5px', background: 'white' }}
-                        >
-                            Login as {agent.name}
-                        </button>
-                    ))}
-                </div>
-            </div>
-        );
-    }
+    if (!selectedAgent) return <p>Loading Agent Profile...</p>;
 
     return (
         <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
